@@ -1,0 +1,19 @@
+{
+  "hero": {
+    "title": "Bye From Handover",
+    "subtitle": "The developer-friendly CMS boilerplate.",
+    "cta_text": "Get Started",
+    "cta_link": "#",
+    "image": "/placeholder-hero.jpg"
+  },
+  "about": {
+    "title": "About Us",
+    "text": "Handover bridges the gap between static sites and complex CMSs. It allows developers to code a custom website layout while giving non-technical clients a secure Admin dashboard to update text, swap images, and tweak specific theme colors without touching the code or breaking the layout."
+  },
+  "theme": {
+    "primary_color": "#ee0200",
+    "secondary_color": "#10b981",
+    "background_color": "#ffffff",
+    "text_color": "#647ca6"
+  }
+}

@@ -1,36 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Handover 🤝
 
-## Getting Started
+**Handover** is a developer-first CMS boilerplate that bridges the gap between static sites and complex CMSs. It allows you to code a custom website layout while giving non-technical clients a secure "Admin" dashboard to update text, swap images, and tweak specific theme colors without touching the code or breaking the layout.
 
-First, run the development server:
+## Core Philosophy
+
+**"Content is separate from Structure."**
+
+- **You (The Developer)** control the Layout (HTML/CSS/Structure).
+- **The Client** controls the Content (Text, Images, Color Variables).
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/yourusername/handover.git my-client-site
+cd my-client-site
+npm install
+```
+
+### 2. Configure Environment
+
+Create a `.env` file in the root directory:
+
+```bash
+# .env
+ADMIN_PASSWORD=your_secure_password
+REQUIRE_AUTH=true
+```
+
+### 3. Run Locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Public Site**: [http://localhost:3000](http://localhost:3000)
+- **Admin Panel**: [http://localhost:3000/admin](http://localhost:3000/admin)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Development Workflow
 
-## Learn More
+### 1. Define Your Content Schema
 
-To learn more about Next.js, take a look at the following resources:
+The heart of Handover is `content.json`. This file defines what your client can edit.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```json
+// content.json
+{
+  "hero": {
+    "title": "Welcome to My Site",
+    "image": "/uploads/hero.jpg"
+  },
+  "theme": {
+    "primary_color": "#3b82f6"
+  }
+}
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 2. Build Your Layout
 
-## Deploy on Vercel
+In your Next.js pages (e.g., `app/page.tsx`), fetch the content and render it.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```tsx
+import { getContent } from "@/lib/content";
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+export default async function Page() {
+  const content = await getContent();
+
+  return (
+    <h1 style={{ color: content.theme.primary_color }}>
+      {content.hero.title}
+    </h1>
+  );
+}
+```
+
+### 3. Add New Editable Fields
+
+To add a new section (e.g., "Testimonials"):
+
+1.  **Update `content.json`**: Add the initial data structure.
+    ```json
+    "testimonials": {
+      "quote": "Great service!",
+      "author": "Jane Doe"
+    }
+    ```
+2.  **Update `lib/content.ts`**: Add the type definition (optional but recommended for TypeScript).
+3.  **Update Admin UI**: Edit `app/admin/DashboardClient.tsx` to add inputs for the new fields.
+
+```tsx
+{/* Testimonials Section */}
+<section>
+  <h2>Testimonials</h2>
+  <input 
+    value={content.testimonials.quote} 
+    onChange={(e) => handleChange('testimonials', 'quote', e.target.value)} 
+  />
+</section>
+```
+
+---
+
+## 📦 Deployment
+
+1.  **Build**: `npm run build`
+2.  **Start**: `npm start`
+
+**Note**: Since Handover writes to the local filesystem (`content.json` and `public/uploads`), it is best suited for:
+-   **VPS / Docker** (DigitalOcean, Hetzner, Railway with persistent volume).
+-   **Not suitable for Vercel/Netlify** out of the box (as they have ephemeral filesystems). *To support serverless, you would need to swap the `lib/content.ts` adapter to read/write from an external DB or S3.*
+
+---
+
+## 🎨 Customization
+
+-   **Styling**: Uses Tailwind CSS. Modify `globals.css` or `tailwind.config.ts`.
+-   **Theme**: The `app/layout.tsx` injects CSS variables from `content.json` into the `:root`, allowing dynamic theming.
+
+```css
+/* globals.css */
+.btn-primary {
+  background-color: var(--primary); /* Controlled by Admin */
+}
+```
