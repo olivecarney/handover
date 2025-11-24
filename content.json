@@ -1,19 +1,19 @@
 {
   "hero": {
-    "title": "Bye From Handover",
-    "subtitle": "The developer-friendly CMS boilerplate.",
-    "cta_text": "Get Started",
+    "title": "Build Faster, Handover Sooner.",
+    "subtitle": "The ultimate boilerplate for developers who love code and clients who love control.",
+    "cta_text": "Start Building",
     "cta_link": "#",
     "image": "/placeholder-hero.jpg"
   },
   "about": {
-    "title": "About Us",
-    "text": "Handover bridges the gap between static sites and complex CMSs. It allows developers to code a custom website layout while giving non-technical clients a secure Admin dashboard to update text, swap images, and tweak specific theme colors without touching the code or breaking the layout."
+    "title": "Why Handover?",
+    "text": "We believe that the best websites are born from the collaboration between technical precision and creative freedom. Handover empowers developers to craft pixel-perfect structures while giving clients the autonomy to manage their brand's voice and visual identity. No more broken layouts. No more midnight calls to fix a typo. Just seamless collaboration."
   },
   "theme": {
-    "primary_color": "#ee0200",
-    "secondary_color": "#10b981",
-    "background_color": "#ffffff",
-    "text_color": "#647ca6"
+    "primary_color": "#4f46e5",
+    "secondary_color": "#0ea5e9",
+    "background_color": "#f8fafc",
+    "text_color": "#0f172a"
   }
 }
