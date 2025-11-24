@@ -8,7 +8,10 @@ export default async function Home() {
   return (
     <main className="min-h-screen flex flex-col">
       {/* Hero Section */}
-      <section className="relative h-[600px] flex items-center justify-center text-center px-4 bg-gray-100 dark:bg-gray-900 overflow-hidden">
+      <section
+        className="relative h-[600px] flex items-center justify-center text-center px-4 overflow-hidden"
+        style={{ backgroundColor: hero.background_color }}
+      >
         {hero.image && (
           <div className="absolute inset-0 z-0">
             <Image
@@ -38,7 +41,10 @@ export default async function Home() {
       </section>
 
       {/* About Section */}
-      <section className="py-20 px-4">
+      <section
+        className="py-20 px-4"
+        style={{ backgroundColor: about.background_color }}
+      >
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 text-center" style={{ color: 'var(--primary)' }}>
             {about.title}

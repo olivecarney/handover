@@ -10,10 +10,12 @@ export interface ContentData {
     cta_text: string;
     cta_link: string;
     image: string;
+    background_color: string;
   };
   about: {
     title: string;
     text: string;
+    background_color: string;
   };
   theme: {
     primary_color: string;

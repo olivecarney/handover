@@ -137,6 +137,24 @@ export default function DashboardClient({ initialContent }: { initialContent: Co
                                 />
                             </div>
                         </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Background Color</label>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="color"
+                                    value={content.hero.background_color || '#ffffff'}
+                                    onChange={(e) => handleChange('hero', 'background_color', e.target.value)}
+                                    className="h-10 w-10 p-0 border rounded cursor-pointer"
+                                />
+                                <input
+                                    type="text"
+                                    value={content.hero.background_color}
+                                    onChange={(e) => handleChange('hero', 'background_color', e.target.value)}
+                                    className="w-full p-2 border rounded text-sm"
+                                    placeholder="transparent or #hex"
+                                />
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -155,8 +173,24 @@ export default function DashboardClient({ initialContent }: { initialContent: Co
                         <textarea
                             value={content.about.text}
                             onChange={(e) => handleChange('about', 'text', e.target.value)}
-                            className="w-full p-2 border rounded h-32"
+                            className="w-full p-2 border rounded h-32 mb-4"
                         />
+                        <label className="block text-sm font-medium mb-1">Background Color</label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="color"
+                                value={content.about.background_color || '#ffffff'}
+                                onChange={(e) => handleChange('about', 'background_color', e.target.value)}
+                                className="h-10 w-10 p-0 border rounded cursor-pointer"
+                            />
+                            <input
+                                type="text"
+                                value={content.about.background_color}
+                                onChange={(e) => handleChange('about', 'background_color', e.target.value)}
+                                className="w-full p-2 border rounded text-sm"
+                                placeholder="transparent or #hex"
+                            />
+                        </div>
                     </div>
                 </section>
 

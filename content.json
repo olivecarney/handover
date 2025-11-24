@@ -4,11 +4,13 @@
     "subtitle": "The ultimate boilerplate for developers who love code and clients who love control.",
     "cta_text": "Start Building",
     "cta_link": "#",
-    "image": "/placeholder-hero.jpg"
+    "image": "/placeholder-hero.jpg",
+    "background_color": "transparent"
   },
   "about": {
     "title": "Why Handover?",
-    "text": "We believe that the best websites are born from the collaboration between technical precision and creative freedom. Handover empowers developers to craft pixel-perfect structures while giving clients the autonomy to manage their brand's voice and visual identity. No more broken layouts. No more midnight calls to fix a typo. Just seamless collaboration."
+    "text": "We believe that the best websites are born from the collaboration between technical precision and creative freedom. Handover empowers developers to craft pixel-perfect structures while giving clients the autonomy to manage their brand's voice and visual identity. No more broken layouts. No more midnight calls to fix a typo. Just seamless collaboration.",
+    "background_color": "transparent"
   },
   "theme": {
     "primary_color": "#4f46e5",
