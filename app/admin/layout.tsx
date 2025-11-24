@@ -1,24 +1,26 @@
-import { Inter } from "next/font/google";
-import "../globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata = {
-    title: "Handover Admin",
-};
+import AdminSidebar from "./AdminSidebar";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export default function AdminLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
+  const useClerk = process.env.AUTH_PROVIDER === 'clerk';
+
+  if (useClerk) {
     return (
-        <html lang="en">
-            <body className={inter.className}>
-                <div className="min-h-screen bg-gray-50">
-                    {children}
-                </div>
-            </body>
-        </html>
+      <ClerkProvider>
+        <AdminSidebar useClerk={true}>
+          {children}
+        </AdminSidebar>
+      </ClerkProvider>
     );
+  }
+
+  return (
+    <AdminSidebar useClerk={false}>
+      {children}
+    </AdminSidebar>
+  );
 }

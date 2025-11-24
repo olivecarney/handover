@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { getContent } from "@/lib/content";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,22 +20,28 @@ export default async function RootLayout({
   const theme = content.theme;
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <style>{`
           :root {
-            --primary: ${theme.primary_color};
-            --secondary: ${theme.secondary_color};
-            --background: ${theme.background_color};
-            --foreground: ${theme.text_color};
+            --site-primary: ${theme.primary_color};
+            --site-secondary: ${theme.secondary_color};
+            --site-background: ${theme.background_color};
+            --site-foreground: ${theme.text_color};
           }
-          body {
-            background-color: var(--background);
-            color: var(--foreground);
-          }
+          /* We don't apply body styles here anymore to avoid conflict with Admin */
         `}</style>
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

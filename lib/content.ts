@@ -17,6 +17,12 @@ export interface ContentData {
     text: string;
     background_color: string;
   };
+  portfolio: {
+    id: string;
+    title: string;
+    category: string;
+    image: string;
+  }[];
   theme: {
     primary_color: string;
     secondary_color: string;

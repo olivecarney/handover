@@ -4,7 +4,7 @@
     "subtitle": "The ultimate boilerplate for developers who love code and clients who love control.",
     "cta_text": "Start Building",
     "cta_link": "#",
-    "image": "/placeholder-hero.jpg",
+    "image": "/uploads/Topography_Wallpaper.jpg",
     "background_color": "transparent"
   },
   "about": {
@@ -12,6 +12,26 @@
     "text": "We believe that the best websites are born from the collaboration between technical precision and creative freedom. Handover empowers developers to craft pixel-perfect structures while giving clients the autonomy to manage their brand's voice and visual identity. No more broken layouts. No more midnight calls to fix a typo. Just seamless collaboration.",
     "background_color": "transparent"
   },
+  "portfolio": [
+    {
+      "id": "1",
+      "title": "Project Alpha",
+      "category": "Branding",
+      "image": "/placeholder-project-1.jpg"
+    },
+    {
+      "id": "2",
+      "title": "Neon Dreams",
+      "category": "Web Design",
+      "image": "/placeholder-project-2.jpg"
+    },
+    {
+      "id": "3",
+      "title": "Future Tech",
+      "category": "App Development",
+      "image": "/placeholder-project-3.jpg"
+    }
+  ],
   "theme": {
     "primary_color": "#4f46e5",
     "secondary_color": "#0ea5e9",
