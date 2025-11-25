@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { LayoutDashboard, LogOut, Moon, Sun, Monitor } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -17,6 +18,11 @@ export default function AdminSidebar({
 }) {
     const pathname = usePathname();
     const { setTheme, theme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Don't show sidebar on login page
     if (pathname === "/admin/login") {
@@ -65,7 +71,7 @@ export default function AdminSidebar({
                                 onClick={() => setTheme("light")}
                                 className={cn(
                                     "p-1 rounded-sm transition-colors",
-                                    theme === "light" ? "bg-background shadow-sm" : "hover:bg-background/50"
+                                    mounted && theme === "light" ? "bg-background shadow-sm" : "hover:bg-background/50"
                                 )}
                             >
                                 <Sun className="h-3 w-3" />
@@ -74,7 +80,7 @@ export default function AdminSidebar({
                                 onClick={() => setTheme("dark")}
                                 className={cn(
                                     "p-1 rounded-sm transition-colors",
-                                    theme === "dark" ? "bg-background shadow-sm" : "hover:bg-background/50"
+                                    mounted && theme === "dark" ? "bg-background shadow-sm" : "hover:bg-background/50"
                                 )}
                             >
                                 <Moon className="h-3 w-3" />
@@ -83,7 +89,7 @@ export default function AdminSidebar({
                                 onClick={() => setTheme("system")}
                                 className={cn(
                                     "p-1 rounded-sm transition-colors",
-                                    theme === "system" ? "bg-background shadow-sm" : "hover:bg-background/50"
+                                    mounted && theme === "system" ? "bg-background shadow-sm" : "hover:bg-background/50"
                                 )}
                             >
                                 <Monitor className="h-3 w-3" />

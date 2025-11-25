@@ -6,7 +6,7 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 export default function AgencyLayout({ content }: { content: ContentData }) {
-    const { hero, about, portfolio, theme } = content;
+    const { hero, about, portfolio, testimonials, theme } = content;
 
     const container = {
         hidden: { opacity: 0 },
@@ -33,9 +33,13 @@ export default function AgencyLayout({ content }: { content: ContentData }) {
         >
             {/* Navigation (Simple) */}
             <nav className="p-6 flex justify-between items-center max-w-7xl mx-auto w-full">
-                <div className="text-xl font-bold tracking-tighter">AGENCY.</div>
+                <div className="text-xl font-bold tracking-tighter">{content.brand_name || "AGENCY."}</div>
                 <a
                     href="#contact"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
                     className="text-sm font-medium hover:opacity-70 transition-opacity"
                 >
                     Contact
@@ -165,9 +169,39 @@ export default function AgencyLayout({ content }: { content: ContentData }) {
                 </section>
             )}
 
+            {/* Testimonials Section */}
+            {testimonials && testimonials.length > 0 && (
+                <section className="py-24 px-4">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-16">
+                            <h2
+                                className="text-4xl font-bold tracking-tight mb-4"
+                                style={{ color: "var(--site-primary)" }}
+                            >
+                                Client Stories
+                            </h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                            {testimonials.map((t) => (
+                                <div key={t.id} className="p-8 rounded-2xl bg-muted/30 border">
+                                    <p className="text-lg italic mb-6 opacity-80">"{t.quote}"</p>
+                                    <div>
+                                        <p className="font-bold">{t.author}</p>
+                                        <p className="text-sm opacity-60">{t.role}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
             {/* Footer */}
-            <footer className="py-12 px-4 border-t opacity-60 text-center text-sm">
-                <p>© {new Date().getFullYear()} Agency. Powered by Handover.</p>
+            <footer id="contact" className="py-12 px-4 border-t opacity-60 text-center text-sm">
+                <div className="flex flex-col items-center gap-4">
+                    <p>© {new Date().getFullYear()} {content.brand_name || "Agency"}. Powered by <a href="https://github.com/olivecarney/handover" className="underline hover:text-primary">Handover</a>.</p>
+                    <p className="text-xs">Created by <a href="#" className="underline hover:text-primary">Your Name</a></p>
+                </div>
             </footer>
         </main>
     );

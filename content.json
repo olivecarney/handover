@@ -4,7 +4,7 @@
     "subtitle": "The ultimate boilerplate for developers who love code and clients who love control.",
     "cta_text": "Start Building",
     "cta_link": "#",
-    "image": "/uploads/Topography_Wallpaper.jpg",
+    "image": "",
     "background_color": "transparent"
   },
   "about": {
@@ -17,19 +17,19 @@
       "id": "1",
       "title": "Project Alpha",
       "category": "Branding",
-      "image": "/placeholder-project-1.jpg"
+      "image": "/placeholder-project.svg"
     },
     {
       "id": "2",
       "title": "Neon Dreams",
       "category": "Web Design",
-      "image": "/placeholder-project-2.jpg"
+      "image": "/placeholder-project.svg"
     },
     {
       "id": "3",
       "title": "Future Tech",
       "category": "App Development",
-      "image": "/placeholder-project-3.jpg"
+      "image": "/placeholder-project.svg"
     }
   ],
   "theme": {
@@ -37,5 +37,20 @@
     "secondary_color": "#0ea5e9",
     "background_color": "#f8fafc",
     "text_color": "#0f172a"
-  }
+  },
+  "brand_name": "Handover",
+  "testimonials": [
+    {
+      "id": "1",
+      "quote": "Handover transformed how we collaborate with clients. It's a game changer.",
+      "author": "Sarah Jenkins",
+      "role": "CTO, TechFlow"
+    },
+    {
+      "id": "2",
+      "quote": "The perfect balance between control and flexibility. Highly recommended.",
+      "author": "Michael Chen",
+      "role": "Founder, StartUp Inc"
+    }
+  ]
 }

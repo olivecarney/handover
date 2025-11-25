@@ -4,13 +4,15 @@ import { useState } from 'react';
 import { ContentData } from '@/lib/content';
 import Image from 'next/image';
 import { toast } from 'sonner';
-import { Save, Upload, Palette, LayoutTemplate, Type, Image as ImageIcon } from 'lucide-react';
+import { Save, Upload, ChevronDown, ChevronUp, Trash2, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function DashboardClient({ initialContent }: { initialContent: ContentData }) {
     const [content, setContent] = useState<ContentData>(initialContent);
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState('hero');
+    const [expandedPortfolio, setExpandedPortfolio] = useState<number | null>(null);
+    const [expandedTestimonials, setExpandedTestimonials] = useState<number | null>(null);
 
     const handleChange = (section: string, key: string, value: string) => {
         setContent((prev) => ({
@@ -19,6 +21,28 @@ export default function DashboardClient({ initialContent }: { initialContent: Co
                 ...prev[section],
                 [key]: value,
             },
+        }));
+    };
+
+    const handleArrayChange = (section: 'portfolio' | 'testimonials', index: number, key: string, value: string) => {
+        setContent((prev) => {
+            const newArray = [...(prev[section] || [])];
+            newArray[index] = { ...newArray[index], [key]: value };
+            return { ...prev, [section]: newArray };
+        });
+    };
+
+    const handleArrayAdd = (section: 'portfolio' | 'testimonials', newItem: any) => {
+        setContent((prev) => ({
+            ...prev,
+            [section]: [...(prev[section] || []), newItem],
+        }));
+    };
+
+    const handleArrayRemove = (section: 'portfolio' | 'testimonials', index: number) => {
+        setContent((prev) => ({
+            ...prev,
+            [section]: (prev[section] || []).filter((_, i) => i !== index),
         }));
     };
 
@@ -70,11 +94,88 @@ export default function DashboardClient({ initialContent }: { initialContent: Co
         });
     };
 
-    const tabs = [
-        { id: 'hero', label: 'Hero Section', icon: LayoutTemplate },
-        { id: 'about', label: 'About Section', icon: Type },
-        { id: 'theme', label: 'Theme Settings', icon: Palette },
-    ];
+    // Dynamic tabs based on content keys
+    const tabs = Object.keys(content).map(key => ({
+        id: key,
+        label: key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' '),
+    }));
+
+    const renderGenericEditor = (section: string, data: any) => {
+        if (typeof data !== 'object' || data === null) return null;
+
+        return (
+            <div className="grid gap-4">
+                {Object.entries(data).map(([key, value]) => {
+                    const isLongText = key.includes('text') || key.includes('description') || key.includes('bio');
+                    const isColor = key.includes('color');
+                    const isImage = key.includes('image');
+
+                    return (
+                        <div key={key} className="grid gap-2">
+                            <label className="text-sm font-medium leading-none capitalize">{key.replace('_', ' ')}</label>
+
+                            {isImage ? (
+                                <div className="flex items-center gap-4 rounded-lg border p-4 bg-muted/50">
+                                    {value && (
+                                        <div className="relative w-24 h-24 rounded-md overflow-hidden border bg-background">
+                                            <Image src={value as string} alt="Preview" fill className="object-cover" />
+                                        </div>
+                                    )}
+                                    <div className="flex-1">
+                                        <label className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+                                            <Upload className="mr-2 h-4 w-4" />
+                                            Upload Image
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => handleImageUpload(e, section, key)}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+                            ) : isColor ? (
+                                <div className="flex gap-2">
+                                    <div className="relative">
+                                        <input
+                                            type="color"
+                                            value={value === 'transparent' ? '#ffffff' : value as string}
+                                            onChange={(e) => handleChange(section, key, e.target.value)}
+                                            className="h-10 w-10 p-0 border rounded cursor-pointer opacity-0 absolute inset-0"
+                                        />
+                                        <div
+                                            className="h-10 w-10 rounded border shadow-sm"
+                                            style={{ backgroundColor: value === 'transparent' ? 'white' : value as string }}
+                                        />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={value as string}
+                                        onChange={(e) => handleChange(section, key, e.target.value)}
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                        placeholder="transparent or #hex"
+                                    />
+                                </div>
+                            ) : isLongText ? (
+                                <textarea
+                                    value={value as string}
+                                    onChange={(e) => handleChange(section, key, e.target.value)}
+                                    className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                />
+                            ) : (
+                                <input
+                                    type="text"
+                                    value={value as string}
+                                    onChange={(e) => handleChange(section, key, e.target.value)}
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                />
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
 
     return (
         <div className="space-y-6">
@@ -97,216 +198,107 @@ export default function DashboardClient({ initialContent }: { initialContent: Co
                 {/* Tabs Sidebar (Desktop) / Topbar (Mobile) */}
                 <div className="w-full md:w-64 flex-shrink-0">
                     <div className="flex md:flex-col gap-2 overflow-x-auto pb-2 md:pb-0">
-                        {tabs.map((tab) => {
-                            const Icon = tab.icon;
-                            return (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={cn(
-                                        "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors whitespace-nowrap",
-                                        activeTab === tab.id
-                                            ? "bg-primary text-primary-foreground shadow-sm"
-                                            : "hover:bg-muted text-muted-foreground"
-                                    )}
-                                >
-                                    <Icon className="h-4 w-4" />
-                                    {tab.label}
-                                </button>
-                            );
-                        })}
+                        {tabs.map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={cn(
+                                    "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors whitespace-nowrap",
+                                    activeTab === tab.id
+                                        ? "bg-primary text-primary-foreground shadow-sm"
+                                        : "hover:bg-muted text-muted-foreground"
+                                )}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
                 {/* Content Area */}
                 <div className="flex-1 space-y-6">
-                    {/* Hero Tab */}
-                    {activeTab === 'hero' && (
-                        <div className="rounded-xl border bg-card text-card-foreground shadow">
-                            <div className="flex flex-col space-y-1.5 p-6">
-                                <h3 className="text-2xl font-semibold leading-none tracking-tight">Hero Section</h3>
-                                <p className="text-sm text-muted-foreground">Customize the main entry point of your site.</p>
-                            </div>
-                            <div className="p-6 pt-0 space-y-4">
-                                <div className="grid gap-2">
-                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Title</label>
-                                    <input
-                                        type="text"
-                                        value={content.hero.title}
-                                        onChange={(e) => handleChange('hero', 'title', e.target.value)}
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <label className="text-sm font-medium leading-none">Subtitle</label>
-                                    <input
-                                        type="text"
-                                        value={content.hero.subtitle}
-                                        onChange={(e) => handleChange('hero', 'subtitle', e.target.value)}
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="grid gap-2">
-                                        <label className="text-sm font-medium leading-none">CTA Text</label>
-                                        <input
-                                            type="text"
-                                            value={content.hero.cta_text}
-                                            onChange={(e) => handleChange('hero', 'cta_text', e.target.value)}
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                        />
-                                    </div>
-                                    <div className="grid gap-2">
-                                        <label className="text-sm font-medium leading-none">CTA Link</label>
-                                        <input
-                                            type="text"
-                                            value={content.hero.cta_link}
-                                            onChange={(e) => handleChange('hero', 'cta_link', e.target.value)}
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="grid gap-2">
-                                    <label className="text-sm font-medium leading-none">Background Color</label>
-                                    <div className="flex gap-2">
-                                        <div className="relative">
-                                            <input
-                                                type="color"
-                                                value={content.hero.background_color === 'transparent' ? '#ffffff' : content.hero.background_color}
-                                                onChange={(e) => handleChange('hero', 'background_color', e.target.value)}
-                                                className="h-10 w-10 p-0 border rounded cursor-pointer opacity-0 absolute inset-0"
-                                            />
-                                            <div
-                                                className="h-10 w-10 rounded border shadow-sm"
-                                                style={{ backgroundColor: content.hero.background_color === 'transparent' ? 'white' : content.hero.background_color }}
-                                            />
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={content.hero.background_color}
-                                            onChange={(e) => handleChange('hero', 'background_color', e.target.value)}
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                            placeholder="transparent or #hex"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="grid gap-2">
-                                    <label className="text-sm font-medium leading-none">Hero Image</label>
-                                    <div className="flex items-center gap-4 rounded-lg border p-4 bg-muted/50">
-                                        {content.hero.image && (
-                                            <div className="relative w-24 h-24 rounded-md overflow-hidden border bg-background">
-                                                <Image src={content.hero.image} alt="Preview" fill className="object-cover" />
-                                            </div>
-                                        )}
-                                        <div className="flex-1">
-                                            <label className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
-                                                <Upload className="mr-2 h-4 w-4" />
-                                                Upload New Image
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={(e) => handleImageUpload(e, 'hero', 'image')}
-                                                    className="hidden"
-                                                />
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div className="rounded-xl border bg-card text-card-foreground shadow">
+                        <div className="flex flex-col space-y-1.5 p-6">
+                            <h3 className="text-2xl font-semibold leading-none tracking-tight capitalize">{activeTab.replace('_', ' ')}</h3>
+                            <p className="text-sm text-muted-foreground">Manage {activeTab.replace('_', ' ')} settings.</p>
                         </div>
-                    )}
-
-                    {/* About Tab */}
-                    {activeTab === 'about' && (
-                        <div className="rounded-xl border bg-card text-card-foreground shadow">
-                            <div className="flex flex-col space-y-1.5 p-6">
-                                <h3 className="text-2xl font-semibold leading-none tracking-tight">About Section</h3>
-                                <p className="text-sm text-muted-foreground">Tell your story.</p>
-                            </div>
-                            <div className="p-6 pt-0 space-y-4">
-                                <div className="grid gap-2">
-                                    <label className="text-sm font-medium leading-none">Title</label>
-                                    <input
-                                        type="text"
-                                        value={content.about.title}
-                                        onChange={(e) => handleChange('about', 'title', e.target.value)}
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <label className="text-sm font-medium leading-none">Text</label>
-                                    <textarea
-                                        value={content.about.text}
-                                        onChange={(e) => handleChange('about', 'text', e.target.value)}
-                                        className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <label className="text-sm font-medium leading-none">Background Color</label>
-                                    <div className="flex gap-2">
-                                        <div className="relative">
-                                            <input
-                                                type="color"
-                                                value={content.about.background_color === 'transparent' ? '#ffffff' : content.about.background_color}
-                                                onChange={(e) => handleChange('about', 'background_color', e.target.value)}
-                                                className="h-10 w-10 p-0 border rounded cursor-pointer opacity-0 absolute inset-0"
-                                            />
-                                            <div
-                                                className="h-10 w-10 rounded border shadow-sm"
-                                                style={{ backgroundColor: content.about.background_color === 'transparent' ? 'white' : content.about.background_color }}
-                                            />
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={content.about.background_color}
-                                            onChange={(e) => handleChange('about', 'background_color', e.target.value)}
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                            placeholder="transparent or #hex"
-                                        />
+                        <div className="p-6 pt-0">
+                            {/* Array Types (Portfolio, Testimonials) */}
+                            {Array.isArray(content[activeTab]) ? (
+                                <div className="space-y-4">
+                                    <div className="flex justify-end">
+                                        <button
+                                            onClick={() => handleArrayAdd(activeTab as 'portfolio' | 'testimonials', { id: Date.now().toString() })}
+                                            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 px-3"
+                                        >
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Add Item
+                                        </button>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Theme Tab */}
-                    {activeTab === 'theme' && (
-                        <div className="rounded-xl border bg-card text-card-foreground shadow">
-                            <div className="flex flex-col space-y-1.5 p-6">
-                                <h3 className="text-2xl font-semibold leading-none tracking-tight">Theme Colors</h3>
-                                <p className="text-sm text-muted-foreground">Manage your brand colors.</p>
-                            </div>
-                            <div className="p-6 pt-0">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {Object.entries(content.theme).map(([key, value]) => (
-                                        <div key={key} className="space-y-2">
-                                            <label className="text-sm font-medium leading-none capitalize">{key.replace('_', ' ')}</label>
-                                            <div className="flex gap-2">
-                                                <div className="relative">
-                                                    <input
-                                                        type="color"
-                                                        value={value as string}
-                                                        onChange={(e) => handleChange('theme', key, e.target.value)}
-                                                        className="h-10 w-10 p-0 border rounded cursor-pointer opacity-0 absolute inset-0"
-                                                    />
-                                                    <div
-                                                        className="h-10 w-10 rounded border shadow-sm"
-                                                        style={{ backgroundColor: value as string }}
-                                                    />
+                                    <div className="space-y-2">
+                                        {content[activeTab].map((item: any, index: number) => (
+                                            <div key={item.id || index} className="border rounded-lg overflow-hidden">
+                                                <div
+                                                    className="flex items-center justify-between p-4 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+                                                    onClick={() => {
+                                                        if (activeTab === 'portfolio') setExpandedPortfolio(expandedPortfolio === index ? null : index);
+                                                        if (activeTab === 'testimonials') setExpandedTestimonials(expandedTestimonials === index ? null : index);
+                                                    }}
+                                                >
+                                                    <span className="font-medium">{item.title || item.author || 'Untitled'}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleArrayRemove(activeTab as 'portfolio' | 'testimonials', index);
+                                                            }}
+                                                            className="p-2 hover:bg-destructive/10 text-destructive rounded-md transition-colors"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                        {(activeTab === 'portfolio' ? expandedPortfolio : expandedTestimonials) === index ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                                    </div>
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    value={value as string}
-                                                    onChange={(e) => handleChange('theme', key, e.target.value)}
-                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                                />
+                                                {(activeTab === 'portfolio' ? expandedPortfolio : expandedTestimonials) === index && (
+                                                    <div className="p-4 border-t space-y-4 bg-card">
+                                                        {Object.entries(item).map(([key, value]) => {
+                                                            if (key === 'id') return null;
+                                                            return (
+                                                                <div key={key} className="grid gap-2">
+                                                                    <label className="text-sm font-medium leading-none capitalize">{key}</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={value as string}
+                                                                        onChange={(e) => handleArrayChange(activeTab as 'portfolio' | 'testimonials', index, key, e.target.value)}
+                                                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                                                    />
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            ) : typeof content[activeTab] === 'object' ? (
+                                renderGenericEditor(activeTab, content[activeTab])
+                            ) : (
+                                // Simple String/Number values (e.g. brand_name)
+                                <div className="grid gap-2">
+                                    <label className="text-sm font-medium leading-none capitalize">{activeTab.replace('_', ' ')}</label>
+                                    <input
+                                        type="text"
+                                        value={content[activeTab] as string}
+                                        onChange={(e) => {
+                                            setContent(prev => ({ ...prev, [activeTab]: e.target.value }));
+                                        }}
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    />
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
         </div>

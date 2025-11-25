@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { uploadImage } from '@/lib/content';
 import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
@@ -22,22 +21,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
         }
 
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
+        const url = await uploadImage(file);
 
-        // Ensure upload directory exists
-        const uploadDir = path.join(process.cwd(), 'public/uploads');
-        await mkdir(uploadDir, { recursive: true });
-
-        // Sanitize filename
-        const filename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const filepath = path.join(uploadDir, filename);
-
-        await writeFile(filepath, buffer);
-
-        return NextResponse.json({ url: `/uploads/${filename}` });
-    } catch (error) {
+        return NextResponse.json({ url });
+    } catch (error: any) {
         console.error('Upload error:', error);
-        return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+        return NextResponse.json({ error: error.message || 'Upload failed' }, { status: 500 });
     }
 }
