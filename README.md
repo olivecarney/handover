@@ -69,7 +69,7 @@ In your Next.js pages (e.g., `app/page.tsx`), fetch the content and render it.
 import { getContent } from "@/lib/content";
 
 export default async function Page() {
-  const content = getContent();
+  const content = await getContent();
 
   return (
     <h1 style={{ color: content.theme.primary_color }}>
@@ -99,7 +99,7 @@ To add a new section (e.g., "Testimonials"):
   <h2>Testimonials</h2>
   <input
     value={content.testimonials.quote}
-    onChange={(e) => handleChange('testimonials', e.target.value)}
+    onChange={(e) => handleChange('testimonials', 'quote', e.target.value)}
   />
 </section>
 ```
