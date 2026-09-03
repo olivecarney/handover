@@ -1,6 +1,6 @@
 # Handover 🤝
 
-**Handover** is a developer-first CMS boilerplate that bridges the gap between static sites and complex CMSs. It allows you to code a custom website layout while giving non-technical clients a secure "Admin" dashboard to update text, swap images, and tweak specific theme colors without touching the code or breaking the layout.
+**Handover** is a developer-first CMS boilerplate that bridges the gap between static sites and complex CMSs. It allows you to code a custom website layout while giving non-technical clients a password-gated "Admin" dashboard to update text, swap images, and tweak specific theme colors without touching the code or breaking the layout.
 
 ## Core Philosophy
 
@@ -16,7 +16,7 @@
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/yourusername/handover.git my-client-site
+git clone https://github.com/olivecarney/handover.git my-client-site
 cd my-client-site
 npm install
 ```
@@ -83,23 +83,23 @@ export default async function Page() {
 
 To add a new section (e.g., "Testimonials"):
 
-1.  **Update `content.json`**: Add the initial data structure.
+1. **Update `content.json`**: Add the initial data structure.
     ```json
     "testimonials": {
       "quote": "Great service!",
       "author": "Jane Doe"
     }
     ```
-2.  **Update `lib/content.ts`**: Add the type definition (optional but recommended for TypeScript).
-3.  **Update Admin UI**: Edit `app/admin/DashboardClient.tsx` to add inputs for the new fields.
+2. **Update `lib/content.ts`**: Add the type definition (optional but recommended for TypeScript).
+3. **Update Admin UI**: Edit `app/admin/DashboardClient.tsx` to add inputs for the new fields.
 
 ```tsx
 {/* Testimonials Section */}
 <section>
   <h2>Testimonials</h2>
-  <input 
-    value={content.testimonials.quote} 
-    onChange={(e) => handleChange('testimonials', 'quote', e.target.value)} 
+  <input
+    value={content.testimonials.quote}
+    onChange={(e) => handleChange('testimonials', 'quote', e.target.value)}
   />
 </section>
 ```
@@ -108,19 +108,25 @@ To add a new section (e.g., "Testimonials"):
 
 ## 📦 Deployment
 
-1.  **Build**: `npm run build`
-2.  **Start**: `npm start`
+1. **Build**: `npm run build`
+2. **Start**: `npm start`
 
 **Note**: Since Handover writes to the local filesystem (`content.json` and `public/uploads`), it is best suited for:
--   **VPS / Docker** (DigitalOcean, Hetzner, Railway with persistent volume).
--   **Not suitable for Vercel/Netlify** out of the box (as they have ephemeral filesystems). *To support serverless, you would need to swap the `lib/content.ts` adapter to read/write from an external DB or S3.*
+- **VPS / Docker** (DigitalOcean, Hetzner, Railway with persistent volume).
+- **Not suitable for Vercel/Netlify** out of the box (as they have ephemeral filesystems). *To support serverless, you would need to swap the `lib/content.ts` adapter to read/write from an external DB or S3.*
+
+---
+
+## 🔐 Authentication Note
+
+The included shared-password admin gate is intended as a lightweight development/prototyping mechanism, not production-grade authentication. Before deploying Handover for real client content, replace it with a proper session-based authentication provider and appropriate access controls.
 
 ---
 
 ## 🎨 Customization
 
--   **Styling**: Uses Tailwind CSS. Modify `globals.css` or `tailwind.config.ts`.
--   **Theme**: The `app/layout.tsx` injects CSS variables from `content.json` into the `:root`, allowing dynamic theming.
+- **Styling**: Uses Tailwind CSS. Modify `globals.css` or `tailwind.config.ts`.
+- **Theme**: The `app/layout.tsx` injects CSS variables from `content.json` into the `:root`, allowing dynamic theming.
 
 ```css
 /* globals.css */
