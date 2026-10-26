@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { ContentData } from '@/lib/content';
-import Image from 'next/image';
 import { toast } from 'sonner';
-import { Save, Upload, ChevronDown, ChevronUp, Trash2, Plus } from 'lucide-react';
+import { Save, ChevronDown, ChevronUp, Trash2, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import FieldEditor from './components/FieldEditor';
+import MediaLibrary from './components/MediaLibrary';
 
 export default function DashboardClient({ initialContent }: { initialContent: ContentData }) {
     const [content, setContent] = useState<ContentData>(initialContent);
@@ -13,6 +14,23 @@ export default function DashboardClient({ initialContent }: { initialContent: Co
     const [activeTab, setActiveTab] = useState('hero');
     const [expandedPortfolio, setExpandedPortfolio] = useState<number | null>(null);
     const [expandedTestimonials, setExpandedTestimonials] = useState<number | null>(null);
+
+    // Media Library State
+    const [isMediaLibraryOpen, setIsMediaLibraryOpen] = useState(false);
+    const [mediaLibraryCallback, setMediaLibraryCallback] = useState<((url: string) => void) | null>(null);
+
+    const handleOpenMediaLibrary = (callback: (url: string) => void) => {
+        setMediaLibraryCallback(() => callback);
+        setIsMediaLibraryOpen(true);
+    };
+
+    const handleMediaSelect = (url: string) => {
+        if (mediaLibraryCallback) {
+            mediaLibraryCallback(url);
+        }
+        setIsMediaLibraryOpen(false);
+        setMediaLibraryCallback(null);
+    };
 
     const handleChange = (section: string, key: string, value: string) => {
         setContent((prev) => ({
@@ -69,31 +87,6 @@ export default function DashboardClient({ initialContent }: { initialContent: Co
         }
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, section: string, key: string) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const promise = fetch('/api/upload', {
-            method: 'POST',
-            body: formData,
-        }).then(res => res.json());
-
-        toast.promise(promise, {
-            loading: 'Uploading image...',
-            success: (data) => {
-                if (data.url) {
-                    handleChange(section, key, data.url);
-                    return 'Image uploaded!';
-                }
-                throw new Error('Upload failed');
-            },
-            error: 'Upload failed.',
-        });
-    };
-
     // Dynamic tabs based on content keys
     const tabs = Object.keys(content).map(key => ({
         id: key,
@@ -104,75 +97,18 @@ export default function DashboardClient({ initialContent }: { initialContent: Co
         if (typeof data !== 'object' || data === null) return null;
 
         return (
-            <div className="grid gap-4">
-                {Object.entries(data).map(([key, value]) => {
-                    const isLongText = key.includes('text') || key.includes('description') || key.includes('bio');
-                    const isColor = key.includes('color');
-                    const isImage = key.includes('image');
-
-                    return (
-                        <div key={key} className="grid gap-2">
-                            <label className="text-sm font-medium leading-none capitalize">{key.replace('_', ' ')}</label>
-
-                            {isImage ? (
-                                <div className="flex items-center gap-4 rounded-lg border p-4 bg-muted/50">
-                                    {value && (
-                                        <div className="relative w-24 h-24 rounded-md overflow-hidden border bg-background">
-                                            <Image src={value as string} alt="Preview" fill className="object-cover" />
-                                        </div>
-                                    )}
-                                    <div className="flex-1">
-                                        <label className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
-                                            <Upload className="mr-2 h-4 w-4" />
-                                            Upload Image
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => handleImageUpload(e, section, key)}
-                                                className="hidden"
-                                            />
-                                        </label>
-                                    </div>
-                                </div>
-                            ) : isColor ? (
-                                <div className="flex gap-2">
-                                    <div className="relative">
-                                        <input
-                                            type="color"
-                                            value={value === 'transparent' ? '#ffffff' : value as string}
-                                            onChange={(e) => handleChange(section, key, e.target.value)}
-                                            className="h-10 w-10 p-0 border rounded cursor-pointer opacity-0 absolute inset-0"
-                                        />
-                                        <div
-                                            className="h-10 w-10 rounded border shadow-sm"
-                                            style={{ backgroundColor: value === 'transparent' ? 'white' : value as string }}
-                                        />
-                                    </div>
-                                    <input
-                                        type="text"
-                                        value={value as string}
-                                        onChange={(e) => handleChange(section, key, e.target.value)}
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                        placeholder="transparent or #hex"
-                                    />
-                                </div>
-                            ) : isLongText ? (
-                                <textarea
-                                    value={value as string}
-                                    onChange={(e) => handleChange(section, key, e.target.value)}
-                                    className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                />
-                            ) : (
-                                <input
-                                    type="text"
-                                    value={value as string}
-                                    onChange={(e) => handleChange(section, key, e.target.value)}
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                />
-                            )}
-                        </div>
-                    );
-                })}
+            <div className="grid gap-6">
+                {Object.entries(data).map(([key, value]) => (
+                    <div key={key} className="grid gap-2">
+                        <label className="text-sm font-medium leading-none capitalize">{key.replace('_', ' ')}</label>
+                        <FieldEditor
+                            label={key}
+                            value={value}
+                            onChange={(newValue) => handleChange(section, key, newValue)}
+                            onOpenMediaLibrary={handleOpenMediaLibrary}
+                        />
+                    </div>
+                ))}
             </div>
         );
     };
@@ -218,11 +154,11 @@ export default function DashboardClient({ initialContent }: { initialContent: Co
                 {/* Content Area */}
                 <div className="flex-1 space-y-6">
                     <div className="rounded-xl border bg-card text-card-foreground shadow">
-                        <div className="flex flex-col space-y-1.5 p-6">
+                        <div className="flex flex-col space-y-1.5 p-6 border-b">
                             <h3 className="text-2xl font-semibold leading-none tracking-tight capitalize">{activeTab.replace('_', ' ')}</h3>
                             <p className="text-sm text-muted-foreground">Manage {activeTab.replace('_', ' ')} settings.</p>
                         </div>
-                        <div className="p-6 pt-0">
+                        <div className="p-6">
                             {/* Array Types (Portfolio, Testimonials) */}
                             {Array.isArray(content[activeTab]) ? (
                                 <div className="space-y-4">
@@ -235,14 +171,15 @@ export default function DashboardClient({ initialContent }: { initialContent: Co
                                             Add Item
                                         </button>
                                     </div>
-                                    <div className="space-y-2">
+                                    <div className="space-y-4">
                                         {content[activeTab].map((item: any, index: number) => (
-                                            <div key={item.id || index} className="border rounded-lg overflow-hidden">
+                                            <div key={item.id || index} className="border rounded-lg overflow-hidden bg-card">
                                                 <div
                                                     className="flex items-center justify-between p-4 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
                                                     onClick={() => {
-                                                        if (activeTab === 'portfolio') setExpandedPortfolio(expandedPortfolio === index ? null : index);
-                                                        if (activeTab === 'testimonials') setExpandedTestimonials(expandedTestimonials === index ? null : index);
+                                                        const isPortfolio = activeTab === 'portfolio';
+                                                        if (isPortfolio) setExpandedPortfolio(expandedPortfolio === index ? null : index);
+                                                        else setExpandedTestimonials(expandedTestimonials === index ? null : index);
                                                     }}
                                                 >
                                                     <span className="font-medium">{item.title || item.author || 'Untitled'}</span>
@@ -260,17 +197,17 @@ export default function DashboardClient({ initialContent }: { initialContent: Co
                                                     </div>
                                                 </div>
                                                 {(activeTab === 'portfolio' ? expandedPortfolio : expandedTestimonials) === index && (
-                                                    <div className="p-4 border-t space-y-4 bg-card">
+                                                    <div className="p-4 border-t space-y-4">
                                                         {Object.entries(item).map(([key, value]) => {
                                                             if (key === 'id') return null;
                                                             return (
                                                                 <div key={key} className="grid gap-2">
                                                                     <label className="text-sm font-medium leading-none capitalize">{key}</label>
-                                                                    <input
-                                                                        type="text"
-                                                                        value={value as string}
-                                                                        onChange={(e) => handleArrayChange(activeTab as 'portfolio' | 'testimonials', index, key, e.target.value)}
-                                                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                                                    <FieldEditor
+                                                                        label={key}
+                                                                        value={value}
+                                                                        onChange={(newValue) => handleArrayChange(activeTab as 'portfolio' | 'testimonials', index, key, newValue)}
+                                                                        onOpenMediaLibrary={handleOpenMediaLibrary}
                                                                     />
                                                                 </div>
                                                             );
@@ -287,13 +224,11 @@ export default function DashboardClient({ initialContent }: { initialContent: Co
                                 // Simple String/Number values (e.g. brand_name)
                                 <div className="grid gap-2">
                                     <label className="text-sm font-medium leading-none capitalize">{activeTab.replace('_', ' ')}</label>
-                                    <input
-                                        type="text"
-                                        value={content[activeTab] as string}
-                                        onChange={(e) => {
-                                            setContent(prev => ({ ...prev, [activeTab]: e.target.value }));
-                                        }}
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    <FieldEditor
+                                        label={activeTab}
+                                        value={content[activeTab]}
+                                        onChange={(newValue) => setContent(prev => ({ ...prev, [activeTab]: newValue }))}
+                                        onOpenMediaLibrary={handleOpenMediaLibrary}
                                     />
                                 </div>
                             )}
@@ -301,7 +236,12 @@ export default function DashboardClient({ initialContent }: { initialContent: Co
                     </div>
                 </div>
             </div>
+
+            <MediaLibrary
+                isOpen={isMediaLibraryOpen}
+                onClose={() => setIsMediaLibraryOpen(false)}
+                onSelect={handleMediaSelect}
+            />
         </div>
     );
 }
-
